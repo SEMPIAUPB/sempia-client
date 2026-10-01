@@ -10,6 +10,12 @@ const ProblemsCatalogView = React.lazy(() => import('../features/exercises/Probl
 const LoginView = React.lazy(() => import('../features/auth/LoginView'));
 const RegisterView = React.lazy(() => import('../features/auth/RegisterView'));
 
+const ProfileView = React.lazy(() => import('../features/profile/ProfileView'));
+const SubmissionsHistoryView = React.lazy(() => import('../features/submissions/SubmissionsHistoryView'));
+const RankingView = React.lazy(() => import('../features/gamification/RankingView'));
+const CompetitionsView = React.lazy(() => import('../features/gamification/CompetitionsView'));
+const AchievementsView = React.lazy(() => import('../features/gamification/AchievementsView'));
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -31,6 +37,11 @@ export const router = createBrowserRouter([
       { path: 'skills', element: <GraphVisualization /> },
       { path: 'problems', element: <ProblemsCatalogView /> },
       { path: 'exercise/:id', element: <CodeEditorView /> },
+      { path: 'profile', element: <ProfileView /> },
+      { path: 'submissions', element: <SubmissionsHistoryView /> },
+      { path: 'ranking', element: <RankingView /> },
+      { path: 'competitions', element: <CompetitionsView /> },
+      { path: 'achievements', element: <AchievementsView /> },
     ]
   },
   {

@@ -17,6 +17,14 @@ export const RegisterSchema = z.object({
   email: z.string().email("Debe ser un correo válido"),
   full_name: z.string().min(1, "El nombre completo es obligatorio"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  birth_date: z.string().min(1, "La fecha de nacimiento es obligatoria"),
+  accept_policies: z.boolean().refine(val => val === true, {
+    message: "Debe aceptar las políticas de tratamiento de datos",
+  }),
+  is_student: z.boolean().default(true),
+  university: z.string().optional(),
+  current_semester: z.preprocess((val) => (val === "" ? undefined : Number(val)), z.number().min(1).max(20).optional()),
+  faculty: z.string().optional(),
 });
 
 export type Register = z.infer<typeof RegisterSchema>;
@@ -26,7 +34,12 @@ export interface User {
   username: string;
   email: string;
   full_name: string;
-  role: 'STUDENT' | 'ADMIN_TEACHER';
+  role: 'STUDENT' | 'ADMIN_TEACHER' | 'SUPER_ADMIN';
+  birth_date?: string;
+  is_student?: boolean;
+  university?: string;
+  current_semester?: number;
+  faculty?: string;
   date_joined: string;
 }
 
@@ -96,4 +109,11 @@ export interface Submission {
   error_details: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }

@@ -22,8 +22,18 @@ export const authService = {
     return response.data;
   },
   
-  logout: async () => {
-    const response = await apiClient.post('/accounts/logout/');
+  logout: async (refresh: string) => {
+    const response = await apiClient.post('/accounts/logout/', { refresh });
+    return response.data;
+  },
+
+  updateProfile: async (data: Partial<User>) => {
+    const response = await apiClient.patch<User>('/accounts/profile/', data);
+    return response.data;
+  },
+
+  changePassword: async (data: any) => {
+    const response = await apiClient.put('/accounts/password/', data);
     return response.data;
   }
 };

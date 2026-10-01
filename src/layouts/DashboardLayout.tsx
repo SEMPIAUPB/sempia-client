@@ -1,33 +1,53 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut, History, Menu } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function DashboardLayout() {
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const user = useAuthStore((state) => state.user);
+
+  React.useEffect(() => {
+    if (location.pathname.includes('/dashboard/exercise/')) {
+      setIsSidebarCollapsed(true);
+    } else {
+      setIsSidebarCollapsed(false);
+    }
+  }, [location.pathname]);
 
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (refreshToken) {
+      try {
+        const { authService } = await import('../services/api/authService');
+        await authService.logout(refreshToken);
+      } catch (error) {
+        console.error('Logout API failed', error);
+      }
+    }
     useAuthStore.getState().clearAuth();
     window.location.href = '/auth/login';
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Problemas', path: '/dashboard/problems', icon: Code2 },
-    { name: 'Ruta de Aprendizaje', path: '/dashboard/path', icon: Map },
-    { name: 'Grafo de Habilidades', path: '/dashboard/skills', icon: Network },
-    { name: 'Competiciones', path: '/dashboard/competitions', icon: Trophy },
-    { name: 'Logros', path: '/dashboard/achievements', icon: Medal },
-    { name: 'Ranking', path: '/dashboard/ranking', icon: BarChart3 },
-    { name: 'Perfil', path: '/dashboard/profile', icon: User },
-  ];
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['STUDENT', 'ADMIN_TEACHER', 'SUPER_ADMIN'] },
+    { name: 'Problemas', path: '/dashboard/problems', icon: Code2, roles: ['STUDENT', 'ADMIN_TEACHER', 'SUPER_ADMIN'] },
+    { name: 'Historial de Envíos', path: '/dashboard/submissions', icon: History, roles: ['STUDENT', 'ADMIN_TEACHER', 'SUPER_ADMIN'] },
+    { name: 'Ruta de Aprendizaje', path: '/dashboard/path', icon: Map, roles: ['STUDENT'] },
+    { name: 'Grafo de Habilidades', path: '/dashboard/skills', icon: Network, roles: ['STUDENT'] },
+    { name: 'Competiciones', path: '/dashboard/competitions', icon: Trophy, roles: ['STUDENT'] },
+    { name: 'Logros', path: '/dashboard/achievements', icon: Medal, roles: ['STUDENT'] },
+    { name: 'Ranking', path: '/dashboard/ranking', icon: BarChart3, roles: ['STUDENT', 'ADMIN_TEACHER', 'SUPER_ADMIN'] },
+    { name: 'Administración', path: '/dashboard/admin', icon: Settings, roles: ['ADMIN_TEACHER', 'SUPER_ADMIN'] },
+    { name: 'Perfil', path: '/dashboard/profile', icon: User, roles: ['STUDENT', 'ADMIN_TEACHER', 'SUPER_ADMIN'] },
+  ].filter(item => item.roles.includes(user?.role || 'STUDENT'));
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-light font-sans text-brand-black">
@@ -35,6 +55,12 @@ export default function DashboardLayout() {
       {/* Top Navigation Bar */}
       <header className="h-16 bg-white shadow-sm border-b border-brand-border flex items-center justify-between px-6 z-10 sticky top-0">
         <div className="flex items-center">
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="mr-4 text-brand-gray hover:text-brand-blue transition-colors focus:outline-none"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
           <div className="w-8 h-8 rounded-md bg-brand-blue flex items-center justify-center mr-3">
              <span className="text-white font-bold text-lg leading-none">S</span>
           </div>
@@ -82,8 +108,8 @@ export default function DashboardLayout() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-64 bg-white border-r border-brand-border overflow-y-auto">
-          <nav className="p-4 space-y-1">
+        <aside className={`${isSidebarCollapsed ? 'w-16' : 'w-64'} bg-white border-r border-brand-border overflow-y-auto transition-all duration-300 ease-in-out`}>
+          <nav className="p-4 space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
               const Icon = item.icon;
@@ -91,14 +117,15 @@ export default function DashboardLayout() {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${
+                  title={isSidebarCollapsed ? item.name : undefined}
+                  className={`flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'px-4'} py-3 text-sm font-medium rounded-xl transition-all ${
                     isActive
                       ? 'bg-blue-50 text-brand-blue'
                       : 'text-brand-gray hover:bg-brand-light hover:text-brand-black'
                   }`}
                 >
-                  <Icon className={`h-5 w-5 mr-3 ${isActive ? 'text-brand-blue' : 'text-brand-gray'}`} />
-                  {item.name}
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-brand-blue' : 'text-brand-gray'} ${!isSidebarCollapsed && 'mr-3'}`} />
+                  {!isSidebarCollapsed && <span className="truncate">{item.name}</span>}
                 </Link>
               );
             })}

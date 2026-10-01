@@ -11,9 +11,15 @@ export default function RegisterView() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Register>({
-    resolver: zodResolver(RegisterSchema)
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<Register>({
+    resolver: zodResolver(RegisterSchema),
+    defaultValues: {
+      is_student: true,
+      university: 'Universidad Pontificia Bolivariana'
+    }
   });
+
+  const isStudent = watch('is_student');
 
   const onSubmit = async (data: Register) => {
     try {
@@ -101,6 +107,77 @@ export default function RegisterView() {
               placeholder="Mínimo 8 caracteres" 
             />
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+            <input 
+              {...register("birth_date")}
+              type="date" 
+              className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-brand-border placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent sm:text-sm transition-shadow" 
+            />
+            {errors.birth_date && <p className="text-red-500 text-xs mt-1">{errors.birth_date.message}</p>}
+          </div>
+
+          <div className="flex items-center">
+            <input
+              {...register("is_student")}
+              type="checkbox"
+              id="is_student"
+              className="h-4 w-4 text-brand-blue focus:ring-brand-blue border-gray-300 rounded"
+            />
+            <label htmlFor="is_student" className="ml-2 block text-sm text-gray-900">
+              Soy estudiante
+            </label>
+          </div>
+
+          {isStudent && (
+            <div className="space-y-4 border-l-2 border-brand-blue pl-4 pt-2 pb-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Universidad</label>
+                <input 
+                  {...register("university")}
+                  type="text" 
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-brand-border placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent sm:text-sm transition-shadow" 
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Semestre en curso</label>
+                <input 
+                  {...register("current_semester")}
+                  type="number" 
+                  min="1" max="20"
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-brand-border placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent sm:text-sm transition-shadow" 
+                  placeholder="Ej: 5" 
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Facultad</label>
+                <input 
+                  {...register("faculty")}
+                  type="text" 
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-brand-border placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent sm:text-sm transition-shadow" 
+                  placeholder="Ej: Ingeniería" 
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-start">
+              <input
+                {...register("accept_policies")}
+                type="checkbox"
+                id="accept_policies"
+                className="mt-1 h-4 w-4 text-brand-blue focus:ring-brand-blue border-gray-300 rounded"
+              />
+              <label htmlFor="accept_policies" className="ml-2 block text-sm text-gray-700">
+                Acepto las políticas de tratamiento de datos y autorizo el uso de mi información para fines estadísticos de la plataforma.
+              </label>
+            </div>
+            {errors.accept_policies && <p className="text-red-500 text-xs mt-1">{errors.accept_policies.message}</p>}
           </div>
         </div>
 

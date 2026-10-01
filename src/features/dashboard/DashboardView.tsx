@@ -108,16 +108,19 @@ export default function DashboardView() {
         </div>
       </div>
 
-      {/* Gamification and Knowledge Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Gamification Section */}
+      {/* Knowledge Graph Full-Width Section */}
+      <div className="w-full h-[700px]">
+        <GraphVisualization />
+      </div>
+
+      {/* Gamification Section */}
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-white rounded-xl shadow-soft p-6">
           <h3 className="text-lg font-semibold text-brand-black mb-4 flex items-center">
             <Trophy className="h-5 w-5 mr-2 text-brand-yellow" />
             Logros Recientes
           </h3>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center p-3 border border-brand-border rounded-lg">
               <div className="bg-brand-yellow bg-opacity-20 p-2 rounded-full mr-3">
                 <Trophy className="h-6 w-6 text-brand-yellow" />
@@ -141,23 +144,6 @@ export default function DashboardView() {
             Ver todas las insignias
           </button>
         </div>
-
-        {/* Knowledge Graph Snapshot */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-soft p-6 flex flex-col">
-          <h3 className="text-lg font-semibold text-brand-black mb-4">Mapa de Conocimiento</h3>
-          <div className="flex-1 bg-brand-light rounded-xl overflow-hidden relative min-h-[300px]">
-            {/* We embed the GraphVisualization but limit its height */}
-            <div className="absolute inset-0">
-               <GraphVisualization />
-            </div>
-          </div>
-          <div className="mt-4 flex gap-4 text-xs text-brand-gray justify-center">
-            <span className="flex items-center"><div className="w-3 h-3 rounded-full bg-brand-blue mr-1"></div> Dominado</span>
-            <span className="flex items-center"><div className="w-3 h-3 rounded-full bg-blue-300 mr-1"></div> En progreso</span>
-            <span className="flex items-center"><div className="w-3 h-3 rounded-full bg-gray-300 mr-1"></div> Bloqueado</span>
-          </div>
-        </div>
-        
       </div>
       
     </div>
