@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut, History, Menu } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
@@ -18,8 +19,28 @@ export default function DashboardLayout() {
     }
   }, [location.pathname]);
 
+  const { data: progressData } = useQuery({
+    queryKey: ['skillProgress'],
+    queryFn: async () => {
+      const { apiClient } = await import('../services/api/apiClient');
+      const res = await apiClient.get<any[]>('/skills/progress/');
+      return res.data;
+    },
+    enabled: isAuthenticated,
+  });
+
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+
+  if (progressData) {
+    const dataArr = Array.isArray(progressData) ? progressData : (progressData.results || []);
+    if (dataArr.length > 0) {
+      const isInitialized = dataArr.some((p: any) => p.is_initialized);
+      if (!isInitialized && location.pathname !== '/diagnostic') {
+        return <Navigate to="/diagnostic" replace />;
+      }
+    }
   }
 
   const handleLogout = async () => {

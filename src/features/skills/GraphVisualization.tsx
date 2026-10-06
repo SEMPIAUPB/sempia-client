@@ -4,20 +4,20 @@ import { Maximize, Minimize } from 'lucide-react';
 import type { GraphData, NodeData } from '../../services/contracts';
 import skillsData from './skillsData.json';
 
-// Transform initial_graph.json to GraphData format
-const transformGraphData = (): GraphData => {
+// We will fetch UserSkillProgress and map it over the initial graph
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../../services/api/apiClient';
+
+const getInitialGraphData = (): GraphData => {
   const nodes: NodeData[] = [];
   const links: { source: string; target: string }[] = [];
 
   skillsData.forEach((skill) => {
-    const mockMastery = Math.random() > 0.5 ? Math.random() : 0.0;
-    const isInitialized = mockMastery > 0;
-
     nodes.push({
       id: skill.id,
       name: skill.habilidad,
-      mastery: mockMastery,
-      isInitialized: isInitialized,
+      mastery: 0,
+      isInitialized: false,
     });
 
     skill.prerrequisitos.forEach((prereq) => {
@@ -31,13 +31,35 @@ const transformGraphData = (): GraphData => {
   return { nodes, links };
 };
 
-const graphData = transformGraphData();
-
 export default function GraphVisualization() {
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const { data: progressData } = useQuery({
+    queryKey: ['skillProgress'],
+    queryFn: async () => {
+      const res = await apiClient.get<any[]>('/skills/progress/');
+      return res.data;
+    }
+  });
+
+  // Merge real data with static graph
+  const graphData = React.useMemo(() => {
+    const baseGraph = getInitialGraphData();
+    if (progressData) {
+      const dataArr = Array.isArray(progressData) ? progressData : (progressData.results || []);
+      baseGraph.nodes = baseGraph.nodes.map(node => {
+        const p = dataArr.find((x: any) => x.skill.name === node.name);
+        if (p) {
+          return { ...node, mastery: p.mastery_percentage / 100, isInitialized: p.is_initialized };
+        }
+        return node;
+      });
+    }
+    return baseGraph;
+  }, [progressData]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -112,7 +134,7 @@ export default function GraphVisualization() {
         <div>
           <h2 className="text-xl font-bold text-gray-900">Mapa de Conocimiento (Grafo de Habilidades)</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Visualiza tu progreso y dominio de los conceptos de programación (Datos simulados hasta conectar la IA).
+            Visualiza tu progreso y dominio de los conceptos de programación de acuerdo al modelo DKT.
           </p>
           <div className="flex flex-wrap items-center gap-4 mt-4 text-xs font-medium">
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-[#10b981]"></div> Dominado (&gt;80%)</div>

@@ -12,6 +12,8 @@ const RegisterView = React.lazy(() => import('../features/auth/RegisterView'));
 
 const ProfileView = React.lazy(() => import('../features/profile/ProfileView'));
 const SubmissionsHistoryView = React.lazy(() => import('../features/submissions/SubmissionsHistoryView'));
+const DiagnosticExamView = React.lazy(() => import('../features/diagnostic/DiagnosticExamView'));
+const RecommendedPathView = React.lazy(() => import('../features/skills/RecommendedPathView'));
 const RankingView = React.lazy(() => import('../features/gamification/RankingView'));
 const CompetitionsView = React.lazy(() => import('../features/gamification/CompetitionsView'));
 const AchievementsView = React.lazy(() => import('../features/gamification/AchievementsView'));
@@ -30,11 +32,16 @@ export const router = createBrowserRouter([
     ]
   },
   {
+    path: '/diagnostic',
+    element: <DiagnosticExamView />
+  },
+  {
     path: '/dashboard',
     element: <DashboardLayout />,
     children: [
       { path: '', element: <DashboardView /> },
       { path: 'skills', element: <GraphVisualization /> },
+      { path: 'path', element: <RecommendedPathView /> },
       { path: 'problems', element: <ProblemsCatalogView /> },
       { path: 'exercise/:id', element: <CodeEditorView /> },
       { path: 'profile', element: <ProfileView /> },

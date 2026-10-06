@@ -13,6 +13,9 @@ export default function CodeEditorView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<any>(null);
 
+  const [hints, setHints] = useState<string[]>([]);
+  const [isRequestingHint, setIsRequestingHint] = useState(false);
+
   const { data: exercise, isLoading, isError } = useQuery({
     queryKey: ['exercise', id],
     queryFn: () => exercisesService.getExercise(id!),
@@ -40,6 +43,7 @@ export default function CodeEditorView() {
     
     setIsSubmitting(true);
     setSubmissionResult(null);
+    setHints([]); // Reset hints on new submission
     
     try {
       const result = await submissionsService.submitCode({
@@ -56,8 +60,28 @@ export default function CodeEditorView() {
     }
   };
 
-  const handleRequestHint = () => {
-    alert("Solicitando tutoría por IA...");
+  const handleRequestHint = async () => {
+    if (!exercise || !submissionResult) return;
+    setIsRequestingHint(true);
+    try {
+      const { apiClient } = await import('../../services/api/apiClient');
+      const payload = {
+        exercise_statement: exercise.statement,
+        student_code: code,
+        language: language,
+        judge_verdict: submissionResult.verdict,
+        compiler_or_runtime_messages: submissionResult.error_details || 'None',
+        failed_test_cases: 'N/A', // Judge0 basic integration doesn't expose this cleanly yet
+        previous_hints: hints
+      };
+      const res = await apiClient.post('/ai/tutoring/hint', payload);
+      setHints([...hints, res.data.hint_text]);
+    } catch (error) {
+      console.error("Error requesting hint:", error);
+      alert("Hubo un error al conectar con la IA Tutora.");
+    } finally {
+      setIsRequestingHint(false);
+    }
   };
 
   if (isLoading) {
@@ -184,28 +208,68 @@ export default function CodeEditorView() {
         </div>
 
         {/* Columna Derecha: AI Panel */}
-        <div className="lg:col-span-3 border-l border-brand-border bg-white flex flex-col overflow-y-auto">
-          <div className="p-4 border-b border-brand-border bg-brand-light flex items-center space-x-2">
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">IA</span>
+        <div className="lg:col-span-3 border-l border-brand-border bg-white flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-brand-border bg-brand-light flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-sm">IA</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-brand-black leading-tight">Asistente SEMPIA</h3>
+                <p className="text-xs text-brand-gray">Tutoría Inteligente</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-brand-black leading-tight">Asistente SEMPIA</h3>
-              <p className="text-xs text-brand-gray">Tutoría Inteligente</p>
-            </div>
+            {hints.length > 0 && (
+              <span className="text-xs font-bold text-brand-purple bg-purple-50 px-2 py-1 rounded">
+                {hints.length}/5 pistas
+              </span>
+            )}
           </div>
-          <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
-            <HelpCircle className="w-12 h-12 text-brand-purple opacity-20 mb-4" />
-            <h4 className="text-brand-black font-bold mb-2">Tutoría Desactivada</h4>
-            <p className="text-sm text-brand-gray px-4">
-              La integración con IA para pistas dinámicas y análisis de código estará disponible en la siguiente fase (Módulo 5).
-            </p>
-            <button 
-              disabled
-              className="mt-6 px-4 py-2 bg-gray-100 text-gray-400 font-medium text-sm rounded-lg border border-gray-200 cursor-not-allowed"
+          <div className="flex-1 p-4 flex flex-col overflow-y-auto space-y-4 bg-gray-50">
+            {hints.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center">
+                <HelpCircle className="w-12 h-12 text-brand-purple opacity-20 mb-4" />
+                <h4 className="text-brand-black font-bold mb-2">Tutoría Activa</h4>
+                <p className="text-sm text-brand-gray px-4">
+                  Si tu código falla, puedes solicitar pistas progresivas a la IA. La IA analizará tu código y el veredicto sin darte la solución directa.
+                </p>
+              </div>
+            ) : (
+              hints.map((hint, i) => (
+                <div key={i} className="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                  <div className="flex items-center mb-2">
+                    <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold mr-2">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs font-bold text-purple-900 uppercase">Pista</span>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{hint}</p>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="p-4 border-t border-brand-border bg-white">
+             <button 
+              onClick={handleRequestHint}
+              disabled={isRequestingHint || !submissionResult || submissionResult.verdict === 'ACCEPTED' || hints.length >= 5}
+              className="w-full flex items-center justify-center px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Generar Pista (Próximamente)
+              {isRequestingHint ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Analizando...
+                </>
+              ) : hints.length >= 5 ? (
+                "Límite de pistas alcanzado"
+              ) : (
+                "Pedir pista a la IA"
+              )}
             </button>
+            {(!submissionResult || submissionResult.verdict === 'ACCEPTED') && hints.length === 0 && (
+              <p className="text-xs text-center mt-2 text-gray-500">
+                Envía código con error primero para usar el tutor.
+              </p>
+            )}
           </div>
         </div>
       </div>
