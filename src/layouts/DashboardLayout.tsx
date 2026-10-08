@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut, History, Menu } from 'lucide-react';
+import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut, History, Menu, Brain } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function DashboardLayout() {
@@ -33,12 +33,13 @@ export default function DashboardLayout() {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
+  let showDiagnosticBanner = false;
   if (progressData) {
     const dataArr = Array.isArray(progressData) ? progressData : (progressData.results || []);
     if (dataArr.length > 0) {
       const isInitialized = dataArr.some((p: any) => p.is_initialized);
       if (!isInitialized && location.pathname !== '/diagnostic') {
-        return <Navigate to="/diagnostic" replace />;
+        showDiagnosticBanner = true;
       }
     }
   }
@@ -155,6 +156,27 @@ export default function DashboardLayout() {
         
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          {showDiagnosticBanner && (
+            <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex items-center mb-4 sm:mb-0">
+                <div className="w-12 h-12 bg-blue-100 text-brand-blue rounded-full flex items-center justify-center mr-4 shadow-inner">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">¡Comienza tu Ruta de Aprendizaje!</h3>
+                  <p className="text-sm text-gray-600">
+                    Aún no has realizado el examen diagnóstico. Aunque puedes usar la plataforma libremente, te recomendamos hacerlo para adaptar la ruta a tus conocimientos.
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/diagnostic"
+                className="whitespace-nowrap px-6 py-2.5 bg-brand-blue text-white rounded-lg font-bold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all"
+              >
+                Realizar Diagnóstico
+              </Link>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

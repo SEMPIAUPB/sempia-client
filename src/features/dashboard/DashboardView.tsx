@@ -88,19 +88,19 @@ export default function DashboardView() {
           <div className="space-y-3">
             <RecommendationCard 
               title="Caminos Cortos (Dijkstra)" 
-              difficulty="Media" 
+              difficulty="300 pts"
               match="95%" 
               reason="Para mejorar tu 65% en Grafos"
             />
             <RecommendationCard 
               title="Mochila 0-1 (Knapsack)" 
-              difficulty="Difícil" 
+              difficulty="500 pts"
               match="88%" 
               reason="Desafío basado en Programación Dinámica"
             />
             <RecommendationCard 
               title="Rango Máximo (Segment Tree)" 
-              difficulty="Media" 
+              difficulty="200 pts"
               match="82%" 
               reason="Consolida tu base de Árboles"
             />
@@ -173,7 +173,7 @@ function RecommendationCard({ title, difficulty, match, reason }: { title: strin
       </div>
       <div className="flex justify-between items-center mt-1">
         <span className="text-xs text-brand-gray">{reason}</span>
-        <span className={`text-xs px-2 py-0.5 rounded-full ${difficulty === 'Media' ? 'bg-brand-yellow text-black' : difficulty === 'Difícil' ? 'bg-brand-red text-white' : 'bg-brand-blue text-white'}`}>
+        <span className={`text-xs px-2 py-0.5 rounded-full ${difficulty.includes('200') || difficulty.includes('300') ? 'bg-brand-yellow text-black' : difficulty.includes('400') || difficulty.includes('500') ? 'bg-brand-red text-white' : 'bg-brand-blue text-white'}`}>
           {difficulty}
         </span>
       </div>

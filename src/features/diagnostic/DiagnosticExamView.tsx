@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Brain, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { apiClient } from '../../services/api/apiClient';
@@ -21,6 +21,8 @@ export default function DiagnosticExamView() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [currentStep, setCurrentStep] = useState(0);
 
+  const queryClient = useQueryClient();
+
   const { data: questions, isLoading, isError } = useQuery<DiagnosticQuestion[]>({
     queryKey: ['diagnosticExam'],
     queryFn: async () => {
@@ -34,7 +36,8 @@ export default function DiagnosticExamView() {
     mutationFn: async (payload: any[]) => {
       await apiClient.post('/skills/diagnostic/submit/', { answers: payload });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['skillProgress'] });
       navigate('/dashboard');
     }
   });

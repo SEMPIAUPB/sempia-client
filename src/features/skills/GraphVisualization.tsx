@@ -75,8 +75,8 @@ export default function GraphVisualization() {
 
   const getNodeColor = (node: NodeData) => {
     if (!node.isInitialized) return '#d1d5db';
-    if (node.mastery > 0.8) return '#10b981';
-    if (node.mastery > 0.4) return '#f59e0b';
+    if (node.mastery >= 0.8) return '#10b981';
+    if (node.mastery >= 0.4) return '#f59e0b';
     return '#ef4444';
   };
 

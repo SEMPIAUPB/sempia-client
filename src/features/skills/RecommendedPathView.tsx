@@ -79,11 +79,11 @@ export default function RecommendedPathView() {
                   <div className="flex justify-between items-start mb-4">
                     <h3 className="text-lg font-bold text-gray-900">{exercise.title}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      exercise.difficulty === 1 ? 'bg-green-100 text-green-800' :
-                      exercise.difficulty === 2 ? 'bg-yellow-100 text-yellow-800' :
+                      exercise.difficulty <= 100 ? 'bg-green-100 text-green-800' :
+                      exercise.difficulty <= 300 ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
                     }`}>
-                      {exercise.difficulty === 1 ? 'EASY' : exercise.difficulty === 2 ? 'MEDIUM' : 'HARD'}
+                      {exercise.difficulty} pts
                     </span>
                   </div>
                   <p className="text-gray-500 text-sm mb-4">Recomendado basado en tu grafo de progreso actual.</p>

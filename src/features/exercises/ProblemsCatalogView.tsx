@@ -4,17 +4,15 @@ import { Search, Filter, BookOpen, AlertCircle, ChevronLeft, ChevronRight } from
 import { useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/api/exercisesService';
 
-const DifficultyBadge = ({ level }: { level: 1 | 2 | 3 }) => {
-  const map = {
-    1: { label: 'Fácil', color: 'bg-green-100 text-green-800 border-green-200' },
-    2: { label: 'Medio', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-    3: { label: 'Difícil', color: 'bg-red-100 text-red-800 border-red-200' },
-  };
-  const config = map[level] || map[1];
+const DifficultyBadge = ({ level }: { level: number }) => {
+  let color = 'bg-red-100 text-red-800 border-red-200';
+  if (level <= 100) color = 'bg-green-100 text-green-800 border-green-200';
+  else if (level <= 300) color = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+  else if (level <= 500) color = 'bg-orange-100 text-orange-800 border-orange-200';
   
   return (
-    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${config.color}`}>
-      {config.label}
+    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${color}`}>
+      {level} pts
     </span>
   );
 };
@@ -106,9 +104,11 @@ export default function ProblemsCatalogView() {
               className="pl-9 pr-8 py-2 border border-brand-border rounded-lg text-sm text-brand-black bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer appearance-none"
             >
               <option value="">Todas las dificultades</option>
-              <option value="1">Fácil</option>
-              <option value="2">Medio</option>
-              <option value="3">Difícil</option>
+              <option value="100">100 pts</option>
+              <option value="200">200 pts</option>
+              <option value="300">300 pts</option>
+              <option value="400">400 pts</option>
+              <option value="500">500 pts</option>
             </select>
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function ProblemsCatalogView() {
                       </div>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {exercise.skills?.map(skill => (
-                          <span key={skill.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-purple bg-opacity-10 text-brand-purple border border-brand-purple border-opacity-20">
+                          <span key={skill.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
                             {skill.name}
                           </span>
                         ))}
