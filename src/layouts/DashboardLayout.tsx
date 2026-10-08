@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, Settings, LogOut, History, Menu, Brain } from 'lucide-react';
+import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, LogOut, History, Menu, Brain, Moon, Sun, Settings } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function DashboardLayout() {
@@ -10,6 +10,23 @@ export default function DashboardLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const user = useAuthStore((state) => state.user);
+
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  React.useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
   React.useEffect(() => {
     if (location.pathname.includes('/dashboard/exercise/')) {
@@ -75,7 +92,7 @@ export default function DashboardLayout() {
     <div className="min-h-screen flex flex-col bg-brand-light font-sans text-brand-black">
       
       {/* Top Navigation Bar */}
-      <header className="h-16 bg-white shadow-sm border-b border-brand-border flex items-center justify-between px-6 z-10 sticky top-0">
+      <header className="h-16 bg-white shadow-sm border-b border-brand-border flex items-center justify-between px-6 z-10 sticky top-0 transition-colors">
         <div className="flex items-center">
           <button 
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -90,13 +107,35 @@ export default function DashboardLayout() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="text-brand-gray hover:text-brand-blue transition-colors relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-brand-red rounded-full"></span>
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="text-brand-gray hover:text-brand-blue transition-colors p-1"
+            title="Alternar tema"
+          >
+            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
-          <button className="text-brand-gray hover:text-brand-blue transition-colors">
-            <Settings className="h-5 w-5" />
-          </button>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className="text-brand-gray hover:text-brand-blue transition-colors relative p-1"
+            >
+              <Bell className="h-5 w-5" />
+            </button>
+            {isNotificationsOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-soft-lg py-2 z-50 border border-brand-border">
+                  <div className="px-4 py-2 border-b border-brand-border">
+                    <p className="text-sm font-semibold text-brand-black">Notificaciones</p>
+                  </div>
+                  <div className="px-4 py-6 text-center text-brand-gray text-sm">
+                    No tienes notificaciones nuevas.
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           
           {/* Profile Dropdown */}
           <div className="relative">

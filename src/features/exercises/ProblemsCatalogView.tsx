@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, BookOpen, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, BookOpen, AlertCircle, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/api/exercisesService';
 
 const DifficultyBadge = ({ level }: { level: number }) => {
-  let color = 'bg-red-100 text-red-800 border-red-200';
-  if (level <= 100) color = 'bg-green-100 text-green-800 border-green-200';
-  else if (level <= 300) color = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  else if (level <= 500) color = 'bg-orange-100 text-orange-800 border-orange-200';
+  let color = 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
+  if (level <= 100) color = 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+  else if (level <= 300) color = 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
+  else if (level <= 500) color = 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
   
   return (
     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${color}`}>
@@ -146,6 +146,9 @@ export default function ProblemsCatalogView() {
                         <h3 className="text-lg font-bold text-brand-blue group-hover:text-brand-600 truncate">
                           {exercise.title}
                         </h3>
+                        {exercise.is_solved && (
+                          <CheckCircle2 className="w-5 h-5 text-green-500" />
+                        )}
                         {exercise.status === 'DRAFT' && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                             Borrador
@@ -162,8 +165,8 @@ export default function ProblemsCatalogView() {
                     </div>
                     <div className="ml-4 flex-shrink-0 flex items-center space-x-4">
                       <DifficultyBadge level={exercise.difficulty} />
-                      <button className="text-brand-blue hover:text-brand-600 text-sm font-medium">
-                        Resolver &rarr;
+                      <button className={`text-sm font-medium ${exercise.is_solved ? 'text-green-600 hover:text-green-700' : 'text-brand-blue hover:text-brand-600'}`}>
+                        {exercise.is_solved ? 'Resuelto' : 'Resolver'} &rarr;
                       </button>
                     </div>
                   </div>

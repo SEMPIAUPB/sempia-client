@@ -1,10 +1,37 @@
-import React from 'react';
-import { Award, Code, Activity, Target, Zap, Trophy, TrendingUp, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { Code, Activity, Target, Zap, Trophy, TrendingUp, Lock } from 'lucide-react';
 import GraphVisualization from '../skills/GraphVisualization';
 import { useAuthStore } from '../../store/authStore';
+import { dashboardService } from '../../services/api/dashboardService';
+import { gamificationService } from '../../services/api/gamificationService';
+import { skillsService } from '../../services/api/skillsService';
 
 export default function DashboardView() {
   const user = useAuthStore((state) => state.user);
+  const navigate = useNavigate();
+  const [imgError, setImgError] = useState<Record<number, boolean>>({});
+
+  const { data: metrics } = useQuery({
+    queryKey: ['dashboard-metrics'],
+    queryFn: dashboardService.getMetrics
+  });
+
+  const { data: recommended } = useQuery({
+    queryKey: ['recommended-exercises'],
+    queryFn: skillsService.getRecommendedExercises
+  });
+
+  const { data: achievements } = useQuery({
+    queryKey: ['recent-achievements'],
+    queryFn: gamificationService.getAchievements
+  });
+
+  const m = metrics?.learning_metrics;
+  const g = metrics?.gamification;
+  const skills = metrics?.top_skills || [];
+  const recentAchievements = achievements ? achievements.slice(0, 2) : [];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -13,13 +40,13 @@ export default function DashboardView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Student Profile Card */}
-        <div className="bg-white rounded-xl shadow-soft p-6 flex flex-col items-center text-center">
+        <div className="bg-white rounded-xl shadow-soft p-6 flex flex-col items-center text-center h-full justify-center">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-brand-blue text-white flex items-center justify-center text-3xl font-bold border-4 border-white shadow-md">
+            <div className="w-24 h-24 rounded-full bg-brand-blue text-white flex items-center justify-center text-3xl font-bold ring-4 ring-[var(--color-bg-light)] shadow-md">
               {user?.username?.substring(0, 2).toUpperCase() || 'US'}
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-brand-yellow text-brand-black text-xs font-bold px-2 py-1 rounded-full border-2 border-white">
-              Lv. 1
+            <div className="absolute -bottom-2 -right-2 bg-brand-yellow text-brand-black text-xs font-bold px-2 py-1 rounded-full ring-2 ring-[var(--color-bg-light)]">
+              Lv. {g?.level || 1}
             </div>
           </div>
           <h2 className="mt-4 text-xl font-bold text-brand-black">{user?.full_name || 'Estudiante'}</h2>
@@ -27,37 +54,37 @@ export default function DashboardView() {
           
           <div className="w-full mt-6">
             <div className="flex justify-between text-xs text-brand-gray mb-1">
-              <span>XP: 2,450</span>
-              <span>Siguiente: 3,000</span>
+              <span>XP: {g?.points || 0}</span>
+              <span>Siguiente: {g?.next_level_points || 100}</span>
             </div>
             <div className="w-full bg-brand-border rounded-full h-3">
-              <div className="bg-brand-purple h-3 rounded-full" style={{ width: '65%' }}></div>
+              <div className="bg-brand-purple h-3 rounded-full transition-all duration-1000" style={{ width: `${g?.progress_percentage || 0}%` }}></div>
             </div>
           </div>
         </div>
 
         {/* Learning Analytics Section */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-soft p-6">
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-soft p-6 h-full flex flex-col justify-center">
           <h3 className="text-lg font-semibold text-brand-black mb-4">Métricas de Aprendizaje</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex flex-col p-4 bg-brand-light rounded-xl">
               <Code className="h-6 w-6 text-brand-blue mb-2" />
-              <span className="text-2xl font-bold text-brand-black">128</span>
+              <span className="text-2xl font-bold text-brand-black">{m?.problems_solved || 0}</span>
               <span className="text-xs text-brand-gray uppercase tracking-wider">Problemas</span>
             </div>
             <div className="flex flex-col p-4 bg-brand-light rounded-xl">
               <Target className="h-6 w-6 text-brand-red mb-2" />
-              <span className="text-2xl font-bold text-brand-black">68%</span>
+              <span className="text-2xl font-bold text-brand-black">{m?.success_rate || 0}%</span>
               <span className="text-xs text-brand-gray uppercase tracking-wider">Tasa de Éxito</span>
             </div>
             <div className="flex flex-col p-4 bg-brand-light rounded-xl">
               <Zap className="h-6 w-6 text-brand-yellow mb-2" />
-              <span className="text-2xl font-bold text-brand-black">12 <span className="text-sm font-normal">días</span></span>
+              <span className="text-2xl font-bold text-brand-black">{m?.current_streak || 0} <span className="text-sm font-normal">días</span></span>
               <span className="text-xs text-brand-gray uppercase tracking-wider">Racha Actual</span>
             </div>
             <div className="flex flex-col p-4 bg-brand-light rounded-xl">
               <Activity className="h-6 w-6 text-brand-purple mb-2" />
-              <span className="text-2xl font-bold text-brand-black">14.5 <span className="text-sm font-normal">hrs</span></span>
+              <span className="text-2xl font-bold text-brand-black">{m?.training_hours || 0} <span className="text-sm font-normal">hrs</span></span>
               <span className="text-xs text-brand-gray uppercase tracking-wider">Entrenamiento</span>
             </div>
           </div>
@@ -71,11 +98,16 @@ export default function DashboardView() {
         <div className="bg-white rounded-xl shadow-soft p-6">
           <h3 className="text-lg font-semibold text-brand-black mb-4">Dominio de Habilidades</h3>
           <div className="space-y-4">
-            <SkillBar name="Estructuras de Datos (Arrays)" percentage={85} color="bg-brand-blue" />
-            <SkillBar name="Grafos (BFS/DFS)" percentage={65} color="bg-brand-purple" />
-            <SkillBar name="Árboles (Segment Tree)" percentage={50} color="bg-brand-yellow" />
-            <SkillBar name="Algoritmos Golosos" percentage={75} color="bg-brand-red" />
-            <SkillBar name="Programación Dinámica" percentage={40} color="bg-brand-black" />
+            {skills.length === 0 ? (
+              <p className="text-sm text-brand-gray text-center py-4">Aún no hay progreso en habilidades.</p>
+            ) : (
+              skills.map((skill: any, idx: number) => {
+                const colors = ['bg-brand-blue', 'bg-brand-purple', 'bg-brand-yellow', 'bg-brand-red', 'bg-brand-black'];
+                return (
+                  <SkillBar key={skill.name} name={skill.name} percentage={skill.percentage} color={colors[idx % colors.length]} />
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -86,31 +118,34 @@ export default function DashboardView() {
             Recomendaciones para ti
           </h3>
           <div className="space-y-3">
-            <RecommendationCard 
-              title="Caminos Cortos (Dijkstra)" 
-              difficulty="300 pts"
-              match="95%" 
-              reason="Para mejorar tu 65% en Grafos"
-            />
-            <RecommendationCard 
-              title="Mochila 0-1 (Knapsack)" 
-              difficulty="500 pts"
-              match="88%" 
-              reason="Desafío basado en Programación Dinámica"
-            />
-            <RecommendationCard 
-              title="Rango Máximo (Segment Tree)" 
-              difficulty="200 pts"
-              match="82%" 
-              reason="Consolida tu base de Árboles"
-            />
+            {!recommended || recommended.length === 0 ? (
+              <p className="text-sm text-brand-gray text-center py-4">No hay recomendaciones disponibles por ahora.</p>
+            ) : (
+              recommended.slice(0,3).map((rec: any) => (
+                <div key={rec.id} onClick={() => navigate(`/dashboard/exercise/${rec.stable_id}`)}>
+                  <RecommendationCard 
+                    title={rec.title} 
+                    difficulty={`${rec.difficulty} pts`}
+                    match="Ideal" 
+                    reason={`Recomendado para mejorar en: ${rec.skills?.[0]?.name || 'Algoritmia'}`}
+                  />
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
       {/* Knowledge Graph Full-Width Section */}
-      <div className="w-full h-[700px]">
-        <GraphVisualization />
+      <div className="w-full h-[700px] bg-white rounded-xl shadow-soft p-6 flex flex-col relative overflow-hidden">
+        <h3 className="text-lg font-semibold text-brand-black mb-2 flex items-center z-10 bg-white bg-opacity-80 p-2 rounded-md w-fit">
+          <TrendingUp className="h-5 w-5 mr-2 text-brand-purple" />
+          Mapa de Conocimiento
+        </h3>
+        <p className="text-xs text-brand-gray mb-4 z-10 w-fit">(Usa el ratón para moverte. Haz scroll para hacer zoom.)</p>
+        <div className="absolute inset-0 top-20">
+          <GraphVisualization />
+        </div>
       </div>
 
       {/* Gamification Section */}
@@ -121,26 +156,35 @@ export default function DashboardView() {
             Logros Recientes
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center p-3 border border-brand-border rounded-lg">
-              <div className="bg-brand-yellow bg-opacity-20 p-2 rounded-full mr-3">
-                <Trophy className="h-6 w-6 text-brand-yellow" />
-              </div>
-              <div>
-                <p className="font-semibold text-brand-black text-sm">Rey de los Grafos</p>
-                <p className="text-xs text-brand-gray">Resuelve 10 problemas de grafos seguidos.</p>
-              </div>
-            </div>
-            <div className="flex items-center p-3 border border-brand-border rounded-lg">
-              <div className="bg-brand-red bg-opacity-20 p-2 rounded-full mr-3">
-                <Zap className="h-6 w-6 text-brand-red" />
-              </div>
-              <div>
-                <p className="font-semibold text-brand-black text-sm">Mente Veloz</p>
-                <p className="text-xs text-brand-gray">Primera solución Aceptada sin Errores.</p>
-              </div>
-            </div>
+            {recentAchievements.length === 0 ? (
+              <p className="text-sm text-brand-gray col-span-2 text-center py-4">Aún no has desbloqueado logros.</p>
+            ) : (
+              recentAchievements.map((ua: any) => (
+                <div key={ua.id} className="flex items-center p-3 border border-brand-border rounded-lg bg-white">
+                  <div className="bg-brand-purple bg-opacity-10 p-2 rounded-full mr-3 shrink-0">
+                    {ua.achievement.image_url && !imgError[ua.id] ? (
+                      <img 
+                        src={ua.achievement.image_url} 
+                        alt={ua.achievement.title} 
+                        className="w-8 h-8 rounded-full object-cover" 
+                        onError={() => setImgError(prev => ({...prev, [ua.id]: true}))}
+                      />
+                    ) : (
+                      <Trophy className="h-6 w-6 text-brand-purple" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-brand-black text-sm leading-tight">{ua.achievement.title}</p>
+                    <p className="text-xs text-brand-gray mt-0.5 line-clamp-2">{ua.achievement.description}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-          <button className="w-full mt-4 py-2 text-sm text-brand-blue font-semibold hover:underline">
+          <button 
+            onClick={() => navigate('/dashboard/achievements')}
+            className="w-full mt-4 py-2 text-sm text-brand-blue font-semibold hover:underline"
+          >
             Ver todas las insignias
           </button>
         </div>
@@ -166,10 +210,10 @@ function SkillBar({ name, percentage, color }: { name: string, percentage: numbe
 
 function RecommendationCard({ title, difficulty, match, reason }: { title: string, difficulty: string, match: string, reason: string }) {
   return (
-    <div className="flex flex-col p-3 border border-brand-border hover:border-brand-blue transition-colors rounded-lg cursor-pointer bg-brand-light bg-opacity-50">
+    <div className="flex flex-col p-3 border border-brand-border hover:border-brand-blue transition-colors rounded-lg cursor-pointer bg-brand-light">
       <div className="flex justify-between items-center mb-1">
         <span className="font-semibold text-brand-black">{title}</span>
-        <span className="text-xs font-bold text-brand-blue bg-blue-100 px-2 py-1 rounded-md">{match} Coincidencia</span>
+        <span className="text-xs font-bold text-brand-blue dark:text-brand-light bg-brand-blue/10 dark:bg-brand-blue/30 px-2 py-1 rounded-md">{match} Coincidencia</span>
       </div>
       <div className="flex justify-between items-center mt-1">
         <span className="text-xs text-brand-gray">{reason}</span>

@@ -36,6 +36,7 @@ export default function GraphVisualization() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isInteractive, setIsInteractive] = useState(false);
 
   const { data: progressData } = useQuery({
     queryKey: ['skillProgress'],
@@ -151,7 +152,20 @@ export default function GraphVisualization() {
           {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
         </button>
       </div>
-      <div className="flex-1 relative w-full h-full bg-gray-50 min-h-[500px]" ref={containerRef}>
+      </div>
+      <div 
+        className="flex-1 relative w-full h-full bg-brand-light min-h-[500px]" 
+        ref={containerRef}
+        onClick={() => setIsInteractive(true)}
+        onMouseLeave={() => setIsInteractive(false)}
+      >
+        {!isInteractive && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/5 cursor-pointer backdrop-blur-[1px] transition-all">
+            <span className="bg-brand-blue text-white px-4 py-2 rounded-full shadow-md font-medium">
+              Haz clic para interactuar
+            </span>
+          </div>
+        )}
         <ForceGraph2D
           ref={fgRef}
           graphData={graphData}
@@ -163,6 +177,8 @@ export default function GraphVisualization() {
           linkDirectionalArrowRelPos={1}
           width={dimensions.width}
           height={dimensions.height}
+          enableZoomInteraction={isInteractive}
+          enablePanInteraction={isInteractive}
         />
       </div>
     </div>
