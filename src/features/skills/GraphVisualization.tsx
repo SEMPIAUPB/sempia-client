@@ -83,8 +83,8 @@ export default function GraphVisualization() {
 
   const handleNodeClick = useCallback((node: any) => {
     if (fgRef.current) {
-       fgRef.current.centerAt(node.x, node.y, 1000);
-       fgRef.current.zoom(4, 2000);
+      fgRef.current.centerAt(node.x, node.y, 1000);
+      fgRef.current.zoom(4, 2000);
     }
   }, []);
 
@@ -125,8 +125,8 @@ export default function GraphVisualization() {
     ctx.fillText(label, node.x, node.y + 6 + (fontSize * 0.1));
   }, []);
 
-  const containerClasses = isFullscreen 
-    ? "fixed inset-0 z-50 bg-white flex flex-col" 
+  const containerClasses = isFullscreen
+    ? "fixed inset-0 z-50 bg-white flex flex-col"
     : "h-full w-full bg-white rounded-xl shadow-sm border border-brand-border flex flex-col overflow-hidden";
 
   return (
@@ -135,7 +135,7 @@ export default function GraphVisualization() {
         <div>
           <h2 className="text-xl font-bold text-gray-900">Mapa de Conocimiento (Grafo de Habilidades)</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Visualiza tu progreso y dominio de los conceptos de programación de acuerdo al modelo DKT.
+            Visualiza tu progreso y dominio de los conceptos de programación.
           </p>
           <div className="flex flex-wrap items-center gap-4 mt-4 text-xs font-medium">
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-[#10b981]"></div> Dominado (&gt;80%)</div>
@@ -144,7 +144,7 @@ export default function GraphVisualization() {
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-[#d1d5db]"></div> No iniciado</div>
           </div>
         </div>
-        <button 
+        <button
           onClick={toggleFullscreen}
           className="p-2 text-gray-500 hover:text-brand-blue hover:bg-blue-50 rounded-lg transition-colors"
           title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
@@ -152,9 +152,8 @@ export default function GraphVisualization() {
           {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
         </button>
       </div>
-      </div>
-      <div 
-        className="flex-1 relative w-full h-full bg-brand-light min-h-[500px]" 
+      <div
+        className="flex-1 relative w-full h-full bg-brand-light min-h-[500px]"
         ref={containerRef}
         onClick={() => setIsInteractive(true)}
         onMouseLeave={() => setIsInteractive(false)}

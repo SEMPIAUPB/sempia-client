@@ -2,30 +2,22 @@ import { apiClient } from './apiClient';
 
 export interface GamificationProfile {
   id: number;
-  user: {
-    id: number;
-    username: string;
-    full_name: string;
-  };
+  username: string;
   points: number;
   level: number;
   current_streak: number;
   highest_streak: number;
 }
 
-export interface Achievement {
+export interface CatalogAchievement {
   id: number;
   stable_id: string;
   title: string;
   description: string;
   image_url: string;
-}
-
-export interface UserAchievement {
-  id: number;
-  achievement: Achievement;
-  awarded_at: string;
-  reason: string;
+  is_unlocked: boolean;
+  awarded_at: string | null;
+  reason: string | null;
 }
 
 export interface Challenge {

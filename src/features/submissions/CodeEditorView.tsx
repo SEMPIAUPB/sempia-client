@@ -231,7 +231,7 @@ export default function CodeEditorView() {
                 <HelpCircle className="w-12 h-12 text-brand-purple opacity-20 mb-4" />
                 <h4 className="text-brand-black font-bold mb-2">Tutoría Activa</h4>
                 <p className="text-sm text-brand-gray px-4">
-                  Si tu código falla, puedes solicitar pistas progresivas a la IA. La IA analizará tu código y el veredicto sin darte la solución directa.
+                  Solicita pistas acá si te sientes atascado.
                 </p>
               </div>
             ) : (
@@ -266,8 +266,8 @@ export default function CodeEditorView() {
               )}
             </button>
             {(!submissionResult || submissionResult.verdict === 'ACCEPTED') && hints.length === 0 && (
-              <p className="text-xs text-center mt-2 text-gray-500">
-                Envía código con error primero para usar el tutor.
+              <p className="text-xs text-center mt-2 text-brand-gray">
+                Envía un intento primero para habilitar el tutor.
               </p>
             )}
           </div>

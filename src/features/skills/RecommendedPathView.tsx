@@ -48,7 +48,7 @@ export default function RecommendedPathView() {
           <h1 className="text-3xl font-bold">Ruta de Aprendizaje</h1>
         </div>
         <p className="text-blue-100 max-w-2xl text-lg leading-relaxed">
-          El motor DKT ha analizado tu nivel en el grafo de habilidades. Aquí tienes los ejercicios que te llevarán al siguiente nivel sin frustrarte ni aburrirte.
+          Analizamos tu nivel actual. Aquí tienes los ejercicios sugeridos para continuar mejorando tus habilidades.
         </p>
         <button 
           onClick={() => navigate('/diagnostic')}
@@ -86,7 +86,13 @@ export default function RecommendedPathView() {
                       {exercise.difficulty} pts
                     </span>
                   </div>
-                  <p className="text-gray-500 text-sm mb-4">Recomendado basado en tu grafo de progreso actual.</p>
+                  {exercise.skills && exercise.skills.length > 0 ? (
+                    <p className="text-gray-500 text-sm mb-4">
+                      Recomendado basado en tus habilidades en: <span className="font-medium text-gray-700">{exercise.skills.map(s => s.name).join(', ')}</span>
+                    </p>
+                  ) : (
+                    <p className="text-gray-500 text-sm mb-4">Recomendado para fortalecer tus bases.</p>
+                  )}
                 </div>
                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
                   <button 

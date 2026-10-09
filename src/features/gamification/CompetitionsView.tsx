@@ -8,6 +8,12 @@ import type { Challenge } from '../../services/api/gamificationService';
 export default function CompetitionsView() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [toast, setToast] = React.useState<{message: string, type: 'success'|'error'} | null>(null);
+
+  const showToast = (message: string, type: 'success'|'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const { data: challenges, isLoading, isError } = useQuery<Challenge[]>({
     queryKey: ['activeChallenges'],
@@ -18,6 +24,10 @@ export default function CompetitionsView() {
     mutationFn: (challengeId: string) => gamificationService.joinChallenge(challengeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeChallenges'] });
+      showToast("¡Te has unido al reto exitosamente! A programar.", "success");
+    },
+    onError: () => {
+      showToast("Ocurrió un error al unirte al reto.", "error");
     }
   });
 
@@ -70,15 +80,24 @@ export default function CompetitionsView() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {challenges.map((challenge) => (
-              <div key={challenge.id} className="bg-white rounded-xl shadow-soft border border-brand-border overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                <div className="p-6 flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-gray-900">{challenge.title}</h3>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full animate-pulse">
-                      ¡En Vivo!
-                    </span>
-                  </div>
+            {challenges.map((challenge) => {
+              const isUpcoming = new Date(challenge.start_date) > new Date();
+              
+              return (
+                <div key={challenge.id} className="bg-white rounded-xl shadow-soft border border-brand-border overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                  <div className="p-6 flex-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-gray-900">{challenge.title}</h3>
+                      {isUpcoming ? (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">
+                          Próximamente
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full animate-pulse">
+                          ¡En Vivo!
+                        </span>
+                      )}
+                    </div>
                   <p className="text-gray-600 mb-6 line-clamp-3">{challenge.description}</p>
                   
                   <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
@@ -92,7 +111,7 @@ export default function CompetitionsView() {
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <Code2 className="w-4 h-4 mr-2 text-brand-purple" />
-                      <strong>Ejercicios:</strong> <span className="ml-2">{challenge.exercises.length} disponibles</span>
+                      <strong>Ejercicios:</strong> <span className="ml-2">{(challenge.exercises || []).length} disponibles</span>
                     </div>
                   </div>
                 </div>
@@ -100,15 +119,15 @@ export default function CompetitionsView() {
                 <div className="p-4 bg-gray-50 border-t border-brand-border flex gap-3">
                   <button 
                     onClick={() => {
-                      // Attempt to join. If it fails because already joined, we catch it or ignore.
-                      joinMutation.mutate(challenge.stable_id);
-                      alert("Te has unido al reto exitosamente. ¡A programar!");
+                      if (!isUpcoming) {
+                        joinMutation.mutate(challenge.stable_id);
+                      }
                     }}
-                    disabled={joinMutation.isPending}
-                    className="flex-1 flex justify-center items-center px-4 py-2 bg-white border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    disabled={joinMutation.isPending || isUpcoming}
+                    className="flex-1 flex justify-center items-center px-4 py-2 bg-white border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Participar
+                    {isUpcoming ? "Pronto..." : "Participar"}
                   </button>
                   <button 
                     onClick={() => navigate('/dashboard/problems')} // In a real app, filter problems by challenge ID
@@ -119,10 +138,23 @@ export default function CompetitionsView() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Custom Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
+          <div className={`px-4 py-3 rounded-lg shadow-lg text-white font-medium flex items-center space-x-2 ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

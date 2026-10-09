@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { exercisesService } from '../../services/api/exercisesService';
 
 const DifficultyBadge = ({ level }: { level: number }) => {
-  let color = 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
-  if (level <= 100) color = 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
-  else if (level <= 300) color = 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
-  else if (level <= 500) color = 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
+  let color = 'bg-red-100 text-red-800 border-red-200';
+  if (level <= 100) color = 'bg-green-100 text-green-800 border-green-200';
+  else if (level <= 300) color = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+  else if (level <= 500) color = 'bg-orange-100 text-orange-800 border-orange-200';
   
   return (
     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${color}`}>
@@ -175,9 +175,9 @@ export default function ProblemsCatalogView() {
             </ul>
 
             {/* Pagination Controls */}
-            <div className="bg-gray-50 px-6 py-3 border-t border-brand-border flex items-center justify-between">
+            <div className="bg-brand-light px-6 py-3 border-t border-brand-border flex items-center justify-between">
               <p className="text-sm text-brand-gray">
-                Mostrando página <span className="font-medium text-brand-black">{page}</span>
+                Mostrando página <span className="font-medium text-brand-black">{page}</span> de <span className="font-medium text-brand-black">{Math.max(1, Math.ceil((exercises?.count || 20) / 20))}</span>
               </p>
               <div className="flex space-x-2">
                 <button

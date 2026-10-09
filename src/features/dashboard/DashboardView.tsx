@@ -31,7 +31,7 @@ export default function DashboardView() {
   const m = metrics?.learning_metrics;
   const g = metrics?.gamification;
   const skills = metrics?.top_skills || [];
-  const recentAchievements = achievements ? achievements.slice(0, 2) : [];
+  const recentAchievements = achievements ? achievements.filter((a: any) => a.is_unlocked).slice(0, 2) : [];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -126,7 +126,7 @@ export default function DashboardView() {
                   <RecommendationCard 
                     title={rec.title} 
                     difficulty={`${rec.difficulty} pts`}
-                    match="Ideal" 
+                    match="Coincidencia Ideal" 
                     reason={`Recomendado para mejorar en: ${rec.skills?.[0]?.name || 'Algoritmia'}`}
                   />
                 </div>
@@ -138,11 +138,10 @@ export default function DashboardView() {
 
       {/* Knowledge Graph Full-Width Section */}
       <div className="w-full h-[700px] bg-white rounded-xl shadow-soft p-6 flex flex-col relative overflow-hidden">
-        <h3 className="text-lg font-semibold text-brand-black mb-2 flex items-center z-10 bg-white bg-opacity-80 p-2 rounded-md w-fit">
+        <h3 className="text-lg font-semibold text-brand-black mb-4 flex items-center z-10 bg-white bg-opacity-80 p-2 rounded-md w-fit">
           <TrendingUp className="h-5 w-5 mr-2 text-brand-purple" />
           Mapa de Conocimiento
         </h3>
-        <p className="text-xs text-brand-gray mb-4 z-10 w-fit">(Usa el ratón para moverte. Haz scroll para hacer zoom.)</p>
         <div className="absolute inset-0 top-20">
           <GraphVisualization />
         </div>
@@ -162,10 +161,10 @@ export default function DashboardView() {
               recentAchievements.map((ua: any) => (
                 <div key={ua.id} className="flex items-center p-3 border border-brand-border rounded-lg bg-white">
                   <div className="bg-brand-purple bg-opacity-10 p-2 rounded-full mr-3 shrink-0">
-                    {ua.achievement.image_url && !imgError[ua.id] ? (
+                    {ua.image_url && !imgError[ua.id] ? (
                       <img 
-                        src={ua.achievement.image_url} 
-                        alt={ua.achievement.title} 
+                        src={ua.image_url} 
+                        alt={ua.title} 
                         className="w-8 h-8 rounded-full object-cover" 
                         onError={() => setImgError(prev => ({...prev, [ua.id]: true}))}
                       />
@@ -174,8 +173,8 @@ export default function DashboardView() {
                     )}
                   </div>
                   <div>
-                    <p className="font-semibold text-brand-black text-sm leading-tight">{ua.achievement.title}</p>
-                    <p className="text-xs text-brand-gray mt-0.5 line-clamp-2">{ua.achievement.description}</p>
+                    <p className="font-semibold text-brand-black text-sm leading-tight">{ua.title}</p>
+                    <p className="text-xs text-brand-gray mt-0.5 line-clamp-2">{ua.description}</p>
                   </div>
                 </div>
               ))
@@ -213,7 +212,7 @@ function RecommendationCard({ title, difficulty, match, reason }: { title: strin
     <div className="flex flex-col p-3 border border-brand-border hover:border-brand-blue transition-colors rounded-lg cursor-pointer bg-brand-light">
       <div className="flex justify-between items-center mb-1">
         <span className="font-semibold text-brand-black">{title}</span>
-        <span className="text-xs font-bold text-brand-blue dark:text-brand-light bg-brand-blue/10 dark:bg-brand-blue/30 px-2 py-1 rounded-md">{match} Coincidencia</span>
+        <span className="text-xs font-bold text-brand-blue bg-brand-blue/10 px-2 py-1 rounded-md">{match}</span>
       </div>
       <div className="flex justify-between items-center mt-1">
         <span className="text-xs text-brand-gray">{reason}</span>

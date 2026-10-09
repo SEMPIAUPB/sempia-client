@@ -36,7 +36,7 @@ export default function SubmissionsHistoryView() {
       case 'MEMORY_LIMIT_EXCEEDED':
         return 'text-orange-500 font-bold';
       case 'RUNTIME_ERROR':
-        return 'text-purple-600 font-bold';
+        return 'text-red-600 font-bold';
       case 'COMPILATION_ERROR':
         return 'text-gray-600 font-bold';
       case 'PENDING':
@@ -64,8 +64,11 @@ export default function SubmissionsHistoryView() {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
+    // Si la fecha viene sin zona horaria, asumimos UTC agregando 'Z'
+    const dateStrWithZone = dateString.endsWith('Z') || dateString.includes('+') ? dateString : dateString + 'Z';
+    const date = new Date(dateStrWithZone);
+    return date.toLocaleString('es-CO', {
+      timeZone: 'America/Bogota',
       month: 'short', day: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
@@ -87,7 +90,6 @@ export default function SubmissionsHistoryView() {
               <tr>
                 <th className="px-4 py-3 font-medium">#</th>
                 <th className="px-4 py-3 font-medium">Fecha</th>
-                <th className="px-4 py-3 font-medium">Autor</th>
                 <th className="px-4 py-3 font-medium">Problema</th>
                 <th className="px-4 py-3 font-medium">Lenguaje</th>
                 <th className="px-4 py-3 font-medium">Veredicto</th>
@@ -99,21 +101,20 @@ export default function SubmissionsHistoryView() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-500">Cargando envíos...</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-500">Cargando envíos...</td>
                 </tr>
               ) : data?.results.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-500">No tienes envíos registrados aún.</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-500">No tienes envíos registrados aún.</td>
                 </tr>
               ) : (
                 data?.results.map((sub) => (
                   <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 text-gray-500">{sub.id}</td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(sub.created_at)}</td>
-                    <td className="px-4 py-3 font-medium text-brand-black">{sub.author_username}</td>
                     <td className="px-4 py-3">
                       <Link to={`/dashboard/exercise/${sub.exercise_stable_id}`} className="text-brand-blue hover:underline font-medium">
-                        {sub.exercise_stable_id}
+                        {(sub as any).exercise_title || sub.exercise_stable_id}
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{sub.language === 'python' ? 'Python 3' : sub.language === 'cpp' ? 'C++17' : sub.language}</td>
@@ -147,7 +148,7 @@ export default function SubmissionsHistoryView() {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Mostrando página <span className="font-medium">{page}</span>
+                Mostrando página <span className="font-medium">{page}</span> de <span className="font-medium">{Math.max(1, Math.ceil((data?.count || 20) / 20))}</span>
               </p>
             </div>
             <div>
@@ -176,7 +177,7 @@ export default function SubmissionsHistoryView() {
 
       {/* Code Modal */}
       {selectedSubmission && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-xl">
               <h3 className="text-lg font-bold text-gray-900">

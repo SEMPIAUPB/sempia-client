@@ -47,7 +47,7 @@ export default function RankingView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       <div className="bg-white p-6 md:p-8 rounded-xl shadow-soft border border-brand-border text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-light text-brand-blue mb-4">
           <Trophy className="w-8 h-8" />
@@ -89,15 +89,7 @@ export default function RankingView() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-brand-purple flex items-center justify-center text-white font-bold">
-                        {profile.user?.username?.substring(0, 2).toUpperCase() || <User className="w-5 h-5" />}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-bold text-gray-900">{profile.user?.full_name}</div>
-                        <div className="text-sm text-gray-500">@{profile.user?.username}</div>
-                      </div>
-                    </div>
+                    <div className="text-sm font-bold text-gray-900">@{profile.username}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">

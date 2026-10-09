@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, LogOut, History, Menu, Brain, Moon, Sun, Settings } from 'lucide-react';
+import { LayoutDashboard, Code2, Map, Network, Trophy, Medal, BarChart3, User, Bell, LogOut, History, Menu, Brain, Settings } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function DashboardLayout() {
@@ -12,21 +12,6 @@ export default function DashboardLayout() {
   const user = useAuthStore((state) => state.user);
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  React.useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
 
   React.useEffect(() => {
     if (location.pathname.includes('/dashboard/exercise/')) {
@@ -89,10 +74,10 @@ export default function DashboardLayout() {
   ].filter(item => item.roles.includes(user?.role || 'STUDENT'));
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-light font-sans text-brand-black">
+    <div className="h-screen flex flex-col bg-brand-light font-sans text-brand-black">
       
       {/* Top Navigation Bar */}
-      <header className="h-16 bg-white shadow-sm border-b border-brand-border flex items-center justify-between px-6 z-10 sticky top-0 transition-colors">
+      <header className="h-16 bg-white shadow-sm border-b border-brand-border flex items-center justify-between px-6 z-30 sticky top-0 transition-colors">
         <div className="flex items-center">
           <button 
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -107,14 +92,6 @@ export default function DashboardLayout() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="text-brand-gray hover:text-brand-blue transition-colors p-1"
-            title="Alternar tema"
-          >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
-          
           <div className="relative">
             <button 
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
