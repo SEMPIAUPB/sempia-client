@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { useAuthStore } from '../../store/authStore';
 
+const defaultBaseURL = typeof window !== 'undefined' && window.location.hostname
+  ? `${window.location.protocol}//${window.location.hostname}:8000/api/v1`
+  : 'http://localhost:8000/api/v1';
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseURL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

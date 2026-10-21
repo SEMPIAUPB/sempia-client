@@ -102,7 +102,7 @@ export default function CodeEditorView() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl shadow-soft overflow-hidden border border-brand-border">
+    <div className="flex flex-col bg-white rounded-xl shadow-soft border border-brand-border">
       <div className="flex bg-brand-light border-b border-brand-border p-5 justify-between items-center">
         <div>
           <h2 className="text-xl font-bold text-brand-black">{exercise.title}</h2>
@@ -120,9 +120,9 @@ export default function CodeEditorView() {
         </div>
       </div>
       
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-brand-light">
+      <div className="grid grid-cols-1 lg:grid-cols-12 bg-brand-light lg:h-[calc(100vh-140px)] lg:min-h-[650px]">
         {/* Columna Izquierda: Problem Statement */}
-        <div className="lg:col-span-3 border-b lg:border-b-0 lg:border-r border-brand-border overflow-y-auto bg-white flex flex-col">
+        <div className="lg:col-span-3 border-b lg:border-b-0 lg:border-r border-brand-border overflow-y-auto bg-white flex flex-col h-[400px] lg:h-auto">
           <div className="p-5 flex-1">
             <h3 className="text-lg font-bold text-brand-black mb-4">Descripción del Problema</h3>
             <div className="prose prose-sm max-w-none text-brand-black" dangerouslySetInnerHTML={{ __html: exercise.statement }} />
@@ -148,7 +148,7 @@ export default function CodeEditorView() {
         </div>
         
         {/* Columna Central: Code Editor */}
-        <div className="lg:col-span-6 flex flex-col bg-[#1e1e1e] border-b lg:border-b-0">
+        <div className="lg:col-span-6 flex flex-col bg-[#1e1e1e] border-b lg:border-b-0 h-[500px] lg:h-auto">
           <div className="flex justify-between items-center p-2 bg-[#2d2d2d] border-b border-[#1e1e1e]">
             <span className="text-xs text-gray-400 font-mono ml-2">solucion.{language === 'python' ? 'py' : 'cpp'}</span>
             <select
@@ -160,7 +160,7 @@ export default function CodeEditorView() {
               <option value="cpp">C++</option>
             </select>
           </div>
-          <div className="flex-1 relative min-h-[400px]">
+          <div className="flex-1 relative min-h-0">
             <Editor
               height="100%"
               language={language}
@@ -208,7 +208,7 @@ export default function CodeEditorView() {
         </div>
 
         {/* Columna Derecha: AI Panel */}
-        <div className="lg:col-span-3 border-l border-brand-border bg-white flex flex-col overflow-hidden">
+        <div className="lg:col-span-3 border-l border-brand-border bg-white flex flex-col overflow-hidden h-[450px] lg:h-auto">
           <div className="p-4 border-b border-brand-border bg-brand-light flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded bg-gradient-to-br from-brand-blue to-brand-purple flex items-center justify-center shadow-sm">
@@ -225,7 +225,7 @@ export default function CodeEditorView() {
               </span>
             )}
           </div>
-          <div className="flex-1 p-4 flex flex-col overflow-y-auto space-y-4 bg-gray-50">
+          <div className="flex-1 p-4 flex flex-col overflow-y-auto space-y-4 bg-gray-50 min-h-0">
             {hints.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <HelpCircle className="w-12 h-12 text-brand-purple opacity-20 mb-4" />
