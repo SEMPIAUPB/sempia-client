@@ -38,6 +38,8 @@ export default function DiagnosticExamView() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['skillProgress'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      await queryClient.invalidateQueries({ queryKey: ['recent-achievements'] });
       navigate('/dashboard');
     }
   });
@@ -99,90 +101,94 @@ export default function DiagnosticExamView() {
     }
   };
 
+  const handleSelect = (choiceId: number) => {
+    setAnswers({
+      ...answers,
+      [currentQ.id]: choiceId
+    });
+  };
+
+  const progressPercentage = ((currentStep + 1) / questions.length) * 100;
+
   return (
-    <div className="min-h-screen bg-brand-light flex flex-col justify-center items-center p-4">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen bg-brand-light py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-soft p-8 border border-brand-border">
+        
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-blue text-white mb-4 shadow-lg">
-            <Brain className="w-8 h-8" />
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-brand-border">
+          <div className="flex items-center space-x-3">
+            <div className="bg-brand-blue bg-opacity-10 p-2.5 rounded-xl">
+              <Brain className="h-6 w-6 text-brand-blue" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-brand-black">Prueba Diagnóstica Inicial</h1>
+              <p className="text-xs text-brand-gray">Determina tu punto de partida en el mapa de conocimiento</p>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-brand-black mb-2">Examen Diagnóstico</h1>
-          <p className="text-brand-gray">
+          <span className="text-sm font-semibold text-brand-blue bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
             Pregunta {currentStep + 1} de {questions.length}
-          </p>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-6 overflow-hidden">
-            <div 
-              className="bg-brand-blue h-2 transition-all duration-300 ease-out" 
-              style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
-            ></div>
-          </div>
+          </span>
         </div>
 
-        {/* Question Card */}
-        <div className="bg-white rounded-2xl shadow-soft overflow-hidden border border-brand-border">
-          <div className="p-8">
-            <div className="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-full mb-4">
-              Tópico: {currentQ.skill_name}
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">{currentQ.text}</h2>
-            
-            <div className="space-y-3">
-              {currentQ.choices.map((choice) => {
-                const isSelected = answers[currentQ.id] === choice.id;
-                return (
-                  <button
-                    key={choice.id}
-                    onClick={() => setAnswers({ ...answers, [currentQ.id]: choice.id })}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      isSelected 
-                        ? 'border-brand-blue bg-blue-50 text-brand-blue' 
-                        : 'border-gray-200 hover:border-brand-purple hover:bg-gray-50 text-gray-700'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${
-                        isSelected ? 'border-brand-blue' : 'border-gray-300'
-                      }`}>
-                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-brand-blue" />}
-                      </div>
-                      <span className="font-medium">{choice.text}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 px-8 py-5 border-t border-brand-border flex justify-between items-center">
-            <button
-              onClick={() => setCurrentStep(s => Math.max(0, s - 1))}
-              disabled={currentStep === 0 || submitMutation.isPending}
-              className="px-6 py-2 text-brand-gray font-medium hover:text-brand-black disabled:opacity-50 transition-colors"
-            >
-              Atrás
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={!hasAnsweredCurrent || submitMutation.isPending}
-              className="flex items-center px-8 py-2.5 bg-brand-blue text-white rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-            >
-              {submitMutation.isPending ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Procesando...
-                </>
-              ) : (
-                <>
-                  {isLastQuestion ? 'Finalizar Examen' : 'Siguiente'}
-                  {!isLastQuestion && <ArrowRight className="w-5 h-5 ml-2" />}
-                </>
-              )}
-            </button>
-          </div>
+        {/* Progress bar */}
+        <div className="w-full bg-gray-100 h-2 rounded-full mb-8 overflow-hidden">
+          <div 
+            className="bg-brand-blue h-full transition-all duration-300 ease-out rounded-full"
+            style={{ width: `${progressPercentage}%` }}
+          />
         </div>
+
+        {/* Question Area */}
+        <div className="mb-8">
+          <div className="inline-block bg-purple-50 text-brand-purple text-xs font-semibold px-2.5 py-1 rounded-md mb-3 border border-purple-100">
+            {currentQ.skill_name || 'Habilidad'}
+          </div>
+          <h2 className="text-lg font-semibold text-brand-black leading-relaxed">
+            {currentQ.text}
+          </h2>
+        </div>
+
+        {/* Choices Area */}
+        <div className="space-y-3 mb-8">
+          {currentQ.choices.map((choice) => {
+            const isSelected = answers[currentQ.id] === choice.id;
+            return (
+              <button
+                key={choice.id}
+                onClick={() => handleSelect(choice.id)}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between ${
+                  isSelected 
+                    ? 'border-brand-blue bg-blue-50 text-brand-blue font-medium' 
+                    : 'border-brand-border hover:border-gray-300 hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                <span>{choice.text}</span>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  isSelected ? 'border-brand-blue bg-brand-blue' : 'border-gray-300'
+                }`}>
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end pt-4 border-t border-brand-border">
+          <button
+            onClick={handleNext}
+            disabled={!hasAnsweredCurrent || submitMutation.isPending}
+            className="flex items-center px-6 py-3 bg-brand-blue hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-md transition-all space-x-2"
+          >
+            <span>{isLastQuestion ? 'Finalizar Examen' : 'Siguiente'}</span>
+            {submitMutation.isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <ArrowRight className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
       </div>
     </div>
   );

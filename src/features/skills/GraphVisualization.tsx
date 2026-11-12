@@ -50,11 +50,13 @@ export default function GraphVisualization() {
   const graphData = React.useMemo(() => {
     const baseGraph = getInitialGraphData();
     if (progressData) {
-      const dataArr = Array.isArray(progressData) ? progressData : (progressData.results || []);
+      const dataArr: any[] = Array.isArray(progressData) ? progressData : ((progressData as any)?.results || []);
       baseGraph.nodes = baseGraph.nodes.map(node => {
-        const p = dataArr.find((x: any) => x.skill.name === node.name);
+        const p = dataArr.find((x: any) => x.skill?.name === node.name);
         if (p) {
-          return { ...node, mastery: p.mastery_percentage / 100, isInitialized: p.is_initialized };
+          const mastery = (p.mastery_percentage || 0) / 100;
+          const isInitialized = Boolean(p.is_initialized && mastery > 0);
+          return { ...node, mastery, isInitialized };
         }
         return node;
       });
@@ -75,7 +77,7 @@ export default function GraphVisualization() {
   }, [isFullscreen]); // Re-bind observer if ref changes due to fullscreen
 
   const getNodeColor = (node: NodeData) => {
-    if (!node.isInitialized) return '#d1d5db';
+    if (!node.isInitialized || !node.mastery || node.mastery <= 0) return '#d1d5db';
     if (node.mastery >= 0.8) return '#10b981';
     if (node.mastery >= 0.4) return '#f59e0b';
     return '#ef4444';

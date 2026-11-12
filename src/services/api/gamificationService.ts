@@ -3,6 +3,7 @@ import { apiClient } from './apiClient';
 export interface GamificationProfile {
   id: number;
   username: string;
+  full_name?: string;
   points: number;
   level: number;
   current_streak: number;
@@ -20,6 +21,23 @@ export interface CatalogAchievement {
   reason: string | null;
 }
 
+export interface ChallengeExercise {
+  id: number;
+  stable_id: string;
+  title: string;
+  difficulty: number;
+  description?: string;
+  is_solved?: boolean;
+}
+
+export interface ChallengeLeaderboardEntry {
+  rank: number;
+  username: string;
+  full_name: string;
+  score: number;
+  joined_at: string;
+}
+
 export interface Challenge {
   id: number;
   stable_id: string;
@@ -27,15 +45,23 @@ export interface Challenge {
   description: string;
   start_date: string;
   end_date: string;
-  exercises: any[];
+  status: 'ACTIVE' | 'UPCOMING' | 'FINISHED';
+  is_joined: boolean;
+  user_score: number;
+  participants_count: number;
+  exercises: ChallengeExercise[];
+  leaderboard: ChallengeLeaderboardEntry[];
 }
 
 export interface ChallengeParticipation {
   id: number;
-  challenge: number;
+  challenge: any;
   user: number;
   score: number;
   joined_at: string;
+  is_joined?: boolean;
+  already_joined?: boolean;
+  message?: string;
 }
 
 export const gamificationService = {
@@ -45,9 +71,8 @@ export const gamificationService = {
   },
 
   getRanking: async () => {
-    // Uses the generic List endpoint (so it's paginated or just a list)
     const response = await apiClient.get<any>('/gamification/ranking/');
-    return response.data.results || response.data; // Handle both paginated and non-paginated
+    return response.data.results || response.data;
   },
 
   getAchievements: async () => {
@@ -58,6 +83,11 @@ export const gamificationService = {
   getActiveChallenges: async () => {
     const response = await apiClient.get<any>('/gamification/challenges/');
     return response.data.results || response.data;
+  },
+
+  getChallengeDetail: async (stable_id: string) => {
+    const response = await apiClient.get<Challenge>(`/gamification/challenges/${stable_id}/`);
+    return response.data;
   },
 
   joinChallenge: async (challenge_id: string) => {
